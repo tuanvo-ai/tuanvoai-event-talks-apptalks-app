@@ -943,6 +943,31 @@ body {
   .timeline-card-wrapper {
     padding-left: 30px;
   }
+  
+  /* Mobile Viewport optimization for header actions */
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .header-actions .btn span {
+    display: none;
+  }
+  
+  .header-actions .btn {
+    padding: 10px;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    gap: 0;
+  }
+  
+  .cache-status {
+    padding: 8px 12px;
+    border-radius: 20px;
+    margin-right: auto;
+  }
 }
 
 /* Light Theme Variables and Overrides */
