@@ -6,6 +6,7 @@ let searchQuery = '';
 // DOM Elements
 const refreshBtn = document.getElementById('refresh-btn');
 const refreshIcon = refreshBtn.querySelector('.icon-refresh');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 const searchInput = document.getElementById('search-input');
 const filterTagsContainer = document.getElementById('filter-tags-container');
 const timelineList = document.getElementById('timeline-list');
@@ -94,23 +95,68 @@ function setupEventListeners() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // Handle Tweet button click via delegation
+  // Handle Export CSV Button click
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', () => {
+      exportToCSV();
+    });
+  }
+
+  // Handle Timeline clicks via delegation (Tweet & Copy)
   timelineList.addEventListener('click', (e) => {
-    const btn = e.target.closest('.tweet-share-btn');
-    if (!btn) return;
-    
-    const updateItem = btn.closest('.update-item');
-    if (!updateItem) return;
-    
-    const date = updateItem.getAttribute('data-date');
-    const type = updateItem.getAttribute('data-type');
-    const link = updateItem.getAttribute('data-link');
-    const descEl = updateItem.querySelector('.update-description');
-    
-    // Strip HTML/Mark highlights to get clean text
-    const cleanText = descEl.textContent || descEl.innerText || '';
-    
-    shareOnTwitter(date, type, cleanText, link);
+    // 1. Tweet button click
+    const tweetBtn = e.target.closest('.tweet-share-btn');
+    if (tweetBtn) {
+      const updateItem = tweetBtn.closest('.update-item');
+      if (updateItem) {
+        const date = updateItem.getAttribute('data-date');
+        const type = updateItem.getAttribute('data-type');
+        const link = updateItem.getAttribute('data-link');
+        const descEl = updateItem.querySelector('.update-description');
+        const cleanText = descEl.textContent || descEl.innerText || '';
+        shareOnTwitter(date, type, cleanText, link);
+      }
+      return;
+    }
+
+    // 2. Card Copy to Clipboard button click
+    const copyBtn = e.target.closest('.card-copy-btn');
+    if (copyBtn) {
+      const card = copyBtn.closest('.timeline-card');
+      const date = card.getAttribute('data-title');
+      const link = card.getAttribute('data-link');
+      const updateItems = card.querySelectorAll('.update-item');
+      
+      let copyText = `BigQuery Release Notes - ${date}\n\n`;
+      updateItems.forEach(item => {
+        const type = item.getAttribute('data-type');
+        const descEl = item.querySelector('.update-description');
+        const cleanDesc = descEl.textContent || descEl.innerText || '';
+        copyText += `[${type}] ${cleanDesc.trim()}\n\n`;
+      });
+      
+      if (link) {
+        copyText += `Read more: ${link}`;
+      }
+      
+      navigator.clipboard.writeText(copyText.trim())
+        .then(() => {
+          showToast(`Copied release notes for ${date} to clipboard!`, 'success');
+          // Visual feedback checkmark
+          const originalSvg = copyBtn.innerHTML;
+          copyBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-feature);">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          `;
+          setTimeout(() => {
+            copyBtn.innerHTML = originalSvg;
+          }, 2000);
+        })
+        .catch(() => {
+          showToast('Failed to copy to clipboard', 'error');
+        });
+    }
   });
 }
 
@@ -295,18 +341,26 @@ function renderTimeline() {
       </div>
       <div class="timeline-badge-node"></div>
       <div class="timeline-card-wrapper">
-        <div class="timeline-card">
+        <div class="timeline-card" data-title="${entry.title}" data-link="${entry.link || ''}">
           <div class="timeline-card-header">
             <h2 class="timeline-card-title">${entry.title}</h2>
-            ${entry.link ? `
-              <a href="${entry.link}" target="_blank" rel="noopener noreferrer" class="timeline-link-btn" title="View official release notes">
+            <div class="card-actions-wrapper" style="display: flex; gap: 10px; align-items: center;">
+              <button class="card-copy-btn timeline-link-btn" style="background: transparent; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Copy Release Notes for this day">
                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
-              </a>
-            ` : ''}
+              </button>
+              ${entry.link ? `
+                <a href="${entry.link}" target="_blank" rel="noopener noreferrer" class="timeline-link-btn" title="View official release notes">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              ` : ''}
+            </div>
           </div>
           <div class="update-items">
             ${updatesHtml}
@@ -389,4 +443,65 @@ function shareOnTwitter(date, type, cleanText, link) {
   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
   
   window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+}
+
+// Export release notes to CSV
+function exportToCSV() {
+  const filtered = [];
+  
+  releaseNotes.forEach(entry => {
+    const matching = entry.updates.filter(update => {
+      const matchesCategory = activeFilters.has(update.type);
+      const matchesSearch = searchQuery === '' || 
+        update.type.toLowerCase().includes(searchQuery) || 
+        update.description.toLowerCase().includes(searchQuery) ||
+        entry.title.toLowerCase().includes(searchQuery);
+      return matchesCategory && matchesSearch;
+    });
+    
+    if (matching.length > 0) {
+      filtered.push({
+        ...entry,
+        updates: matching
+      });
+    }
+  });
+
+  if (filtered.length === 0) {
+    showToast('No data to export matching filters', 'error');
+    return;
+  }
+
+  // Build CSV
+  const headers = ["Date", "Type", "Description", "Link"];
+  const csvRows = [headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",")];
+
+  filtered.forEach(entry => {
+    entry.updates.forEach(update => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = update.description;
+      const cleanDesc = (tempDiv.textContent || tempDiv.innerText || "").trim().replace(/\s+/g, ' ');
+
+      const row = [
+        entry.title,
+        update.type,
+        cleanDesc,
+        entry.link || ""
+      ];
+      csvRows.push(row.map(field => `"${field.replace(/"/g, '""')}"`).join(","));
+    });
+  });
+
+  const csvString = csvRows.join("\n");
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `bigquery_release_notes_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showToast('CSV exported successfully!', 'success');
 }
