@@ -48,11 +48,11 @@ function setupEventListeners() {
     if (!filterTag) return;
 
     const category = filterTag.getAttribute('data-type');
+    const tags = filterTagsContainer.querySelectorAll('.filter-tag');
+    const allTag = filterTagsContainer.querySelector('[data-type="All"]');
     
     if (category === 'All') {
-      const isAllActive = filterTag.classList.contains('active');
-      const tags = filterTagsContainer.querySelectorAll('.filter-tag');
-      
+      const isAllActive = allTag.classList.contains('active');
       if (isAllActive) {
         // Deactivate all
         tags.forEach(t => t.classList.remove('active'));
@@ -63,21 +63,21 @@ function setupEventListeners() {
         activeFilters = new Set(['Feature', 'Deprecation', 'Issue', 'Change', 'Announcement', 'General']);
       }
     } else {
-      // Toggle individual filter
-      const allTag = filterTagsContainer.querySelector('[data-type="All"]');
+      // Solo filtering logic
+      const isCurrentlySolo = activeFilters.size === 1 && activeFilters.has(category);
       
-      if (activeFilters.has(category)) {
-        activeFilters.delete(category);
-        filterTag.classList.remove('active');
-        allTag.classList.remove('active');
+      if (isCurrentlySolo) {
+        // If clicked again when already soloed, reset to All active
+        tags.forEach(t => t.classList.add('active'));
+        activeFilters = new Set(['Feature', 'Deprecation', 'Issue', 'Change', 'Announcement', 'General']);
       } else {
-        activeFilters.add(category);
+        // Solo the clicked category
+        tags.forEach(t => t.classList.remove('active'));
         filterTag.classList.add('active');
+        allTag.classList.remove('active');
         
-        // If all tags are now active, highlight the "All" tag
-        if (activeFilters.size === 6) {
-          allTag.classList.add('active');
-        }
+        activeFilters.clear();
+        activeFilters.add(category);
       }
     }
     
