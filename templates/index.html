@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A modern interactive dashboard to track and filter the latest Google Cloud BigQuery release notes and updates.">
+  <title>BigQuery Release Notes Tracker</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Decorative background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <svg class="bq-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad-logo)" />
+          <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="url(#grad-logo-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <defs>
+            <linearGradient id="grad-logo" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#06b6d4" />
+              <stop offset="1" stop-color="#3b82f6" />
+            </linearGradient>
+            <linearGradient id="grad-logo-2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3b82f6" />
+              <stop offset="1" stop-color="#8b5cf6" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="logo-text">
+          <h1>BigQuery <span>Release Notes</span></h1>
+          <p class="subtitle">Stay updated with Google Cloud BigQuery developments</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div id="cache-status" class="cache-status status-live">
+          <span class="status-indicator"></span>
+          <span id="cache-status-text">Checking feed...</span>
+        </div>
+        <button id="refresh-btn" class="btn btn-primary" title="Refresh Release Notes">
+          <svg class="icon-refresh" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Overview Panel -->
+    <section class="stats-grid" aria-label="Release Metrics">
+      <div class="stat-card" id="stat-total-days">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <h3>Total Release Days</h3>
+          <p class="stat-value" id="val-total-days">-</p>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-total-updates">
+        <div class="stat-icon">📢</div>
+        <div class="stat-info">
+          <h3>Total Updates</h3>
+          <p class="stat-value" id="val-total-updates">-</p>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-features">
+        <div class="stat-icon">✨</div>
+        <div class="stat-info">
+          <h3>Features</h3>
+          <p class="stat-value" id="val-features">-</p>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-issues">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-info">
+          <h3>Issues & Bugs</h3>
+          <p class="stat-value" id="val-issues">-</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Search Controls -->
+    <section class="controls-card" aria-label="Filters">
+      <div class="search-wrapper">
+        <svg class="icon-search" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search release notes by keywords, dates, features..." aria-label="Search release notes">
+      </div>
+      
+      <div class="filter-categories-wrapper">
+        <span class="filter-label">Filter Categories:</span>
+        <div class="filter-tags" id="filter-tags-container">
+          <button class="filter-tag active" data-type="All">All</button>
+          <button class="filter-tag active" data-type="Feature" data-color="feature">
+            <span class="dot dot-feature"></span>Feature
+          </button>
+          <button class="filter-tag active" data-type="Deprecation" data-color="deprecation">
+            <span class="dot dot-deprecation"></span>Deprecation
+          </button>
+          <button class="filter-tag active" data-type="Issue" data-color="issue">
+            <span class="dot dot-issue"></span>Issue
+          </button>
+          <button class="filter-tag active" data-type="Change" data-color="change">
+            <span class="dot dot-change"></span>Change
+          </button>
+          <button class="filter-tag active" data-type="Announcement" data-color="announcement">
+            <span class="dot dot-announcement"></span>Announcement
+          </button>
+          <button class="filter-tag active" data-type="General" data-color="general">
+            <span class="dot dot-general"></span>General
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline Container -->
+    <main class="timeline-container">
+      <div class="timeline-line"></div>
+      
+      <div id="timeline-list" class="timeline-list">
+        <!-- Loading Skeleton State -->
+        <div class="skeleton-entry">
+          <div class="skeleton-date"></div>
+          <div class="skeleton-card">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+          </div>
+        </div>
+        <div class="skeleton-entry">
+          <div class="skeleton-date"></div>
+          <div class="skeleton-card">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+          </div>
+        </div>
+        <div class="skeleton-entry">
+          <div class="skeleton-date"></div>
+          <div class="skeleton-card">
+            <div class="skeleton-header"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-text short"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empty/No Results State -->
+      <div id="no-results" class="no-results hidden">
+        <div class="no-results-icon">🔍</div>
+        <h3>No Release Notes Found</h3>
+        <p>Try refining your search query or enabling more category filters.</p>
+      </div>
+    </main>
+
+    <!-- Scroll to top button -->
+    <button id="scroll-top-btn" class="btn btn-secondary scroll-top-btn hidden" title="Scroll to Top" aria-label="Scroll to top">
+      <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+    </button>
+
+    <!-- Toast message container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 BigQuery Release Notes Dashboard. Built using Flask & Vanilla Web Technologies.</p>
+  </footer>
+
+  <!-- Script -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
