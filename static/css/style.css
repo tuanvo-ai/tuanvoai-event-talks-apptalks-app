@@ -944,3 +944,101 @@ body {
     padding-left: 30px;
   }
 }
+
+/* Light Theme Variables and Overrides */
+body.light-theme {
+  --bg-primary: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-card-hover: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-hover: rgba(0, 0, 0, 0.16);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --accent-cyan: #0891b2;
+  --accent-blue: #2563eb;
+  --accent-purple: #7c3aed;
+  
+  --color-feature-bg: rgba(16, 185, 129, 0.08);
+  --color-deprecation-bg: rgba(245, 158, 11, 0.08);
+  --color-issue-bg: rgba(239, 68, 68, 0.08);
+  --color-change-bg: rgba(59, 130, 246, 0.08);
+  --color-announcement-bg: rgba(168, 85, 247, 0.08);
+  --color-general-bg: rgba(107, 114, 128, 0.08);
+}
+
+body.light-theme .blob {
+  opacity: 0.15;
+}
+
+body.light-theme .logo-text h1 {
+  background: linear-gradient(135deg, #0f172a 40%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light-theme .timeline-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+body.light-theme .search-wrapper input {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+body.light-theme .search-wrapper input::placeholder {
+  color: #94a3b8;
+}
+
+body.light-theme .update-description code {
+  background: rgba(0, 0, 0, 0.05);
+  color: #d01716;
+}
+
+body.light-theme .filter-tag {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-secondary);
+}
+
+body.light-theme .filter-tag:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .filter-tag.active {
+  color: #fff;
+}
+
+body.light-theme .filter-tag.active[data-type="All"] {
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+}
+
+body.light-theme .cache-status {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .btn-secondary {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-primary);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.16);
+}
+
+body.light-theme .timeline-badge-node {
+  background-color: #f8fafc;
+}
+
+body.light-theme .toast {
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}

@@ -7,6 +7,7 @@ let searchQuery = '';
 const refreshBtn = document.getElementById('refresh-btn');
 const refreshIcon = refreshBtn.querySelector('.icon-refresh');
 const exportCsvBtn = document.getElementById('export-csv-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const searchInput = document.getElementById('search-input');
 const filterTagsContainer = document.getElementById('filter-tags-container');
 const timelineList = document.getElementById('timeline-list');
@@ -23,6 +24,7 @@ const valIssues = document.getElementById('val-issues');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   fetchReleaseNotes();
   setupEventListeners();
 });
@@ -99,6 +101,29 @@ function setupEventListeners() {
   if (exportCsvBtn) {
     exportCsvBtn.addEventListener('click', () => {
       exportToCSV();
+    });
+  }
+
+  // Handle Theme Toggle Button click
+  if (themeToggleBtn) {
+    const iconSun = themeToggleBtn.querySelector('.icon-sun');
+    const iconMoon = themeToggleBtn.querySelector('.icon-moon');
+    
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      
+      if (isLight) {
+        localStorage.setItem('theme', 'light');
+        iconSun.classList.remove('hidden');
+        iconMoon.classList.add('hidden');
+        showToast('Switched to Light Mode', 'success');
+      } else {
+        localStorage.setItem('theme', 'dark');
+        iconSun.classList.add('hidden');
+        iconMoon.classList.remove('hidden');
+        showToast('Switched to Dark Mode', 'success');
+      }
     });
   }
 
@@ -504,4 +529,24 @@ function exportToCSV() {
   document.body.removeChild(link);
   
   showToast('CSV exported successfully!', 'success');
+}
+
+// Helper: Initialize Theme
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  if (!themeToggleBtn) return;
+  
+  const iconSun = themeToggleBtn.querySelector('.icon-sun');
+  const iconMoon = themeToggleBtn.querySelector('.icon-moon');
+  
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    if (iconSun) iconSun.classList.remove('hidden');
+    if (iconMoon) iconMoon.classList.add('hidden');
+  } else {
+    document.body.classList.remove('light-theme');
+    if (iconSun) iconSun.classList.add('hidden');
+    if (iconMoon) iconMoon.classList.remove('hidden');
+  }
 }
